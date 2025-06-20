@@ -5,6 +5,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.42.3",
     "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.5.0",
     "node-fetch": "^3.3.2"
   }
 }
