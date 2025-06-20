@@ -1,0 +1,13 @@
+{
+  "name": "apmc-rates-updater",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "fetchRates.js",
+  "scripts": {
+    "start": "node fetchRates.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "cheerio": "^1.0.0-rc.12"
+  }
+}
