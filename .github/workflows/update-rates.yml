@@ -1,20 +1,28 @@
-name: APMC Rate Daily Update
+name: Update APMC Rates Daily
 
 on:
   schedule:
-    - cron: '30 4 * * *'  # 10:00 AM IST daily
-  workflow_dispatch:
+    - cron: '0 6 * * *'  # Runs every day at 6 AM UTC (11:30 AM IST)
+  workflow_dispatch:     # Allow manual trigger
 
 jobs:
   update-rates:
     runs-on: ubuntu-latest
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
-      - run: npm install
-      - run: node fetchRates.js
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run fetchRates script
+        run: node fetchRates.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
