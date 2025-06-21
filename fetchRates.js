@@ -6,13 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
 const url = "https://www.apmcunjha.com/index.php/rates";
 
 async function getRates() {
   try {
     const res = await fetch(url);
     const html = await res.text();
-    const $ = load(html); // ✅ correct usage
+    const $ = load(html);
 
     const marqueeText = $(".marquee-with-options-88").text().trim();
     const dateMatch = marqueeText.match(/Date\s*:\s*([^\n]+)/);
@@ -39,15 +40,25 @@ async function getRates() {
       .eq("date", date);
 
     if (checkError) throw checkError;
+
     if (existing.length > 0) {
-      console.log(`✅ Rates already exist for ${date}`);
-      return;
+      const { error: deleteError } = await supabase
+        .from("apmc_rates")
+        .delete()
+        .eq("date", date);
+
+      if (deleteError) throw deleteError;
+
+      console.log(`🗑️ Deleted ${existing.length} old rates for ${date}`);
     }
 
-    const { error } = await supabase.from("apmc_rates").insert(items);
-    if (error) throw error;
+    const { error: insertError } = await supabase
+      .from("apmc_rates")
+      .insert(items);
 
-    console.log(`✅ Inserted ${items.length} rates for ${date}`);
+    if (insertError) throw insertError;
+
+    console.log(`✅ Inserted ${items.length} new rates for ${date}`);
   } catch (err) {
     console.error("❌ Error fetching/inserting rates:", err.message);
   }
