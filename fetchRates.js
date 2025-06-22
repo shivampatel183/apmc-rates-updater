@@ -6,6 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
 const url = "https://www.apmcunjha.com/index.php/rates";
 
 async function getRates() {
@@ -38,30 +39,16 @@ async function getRates() {
       .eq("date", date);
 
     if (checkError) throw checkError;
-    if (existing.length > 0) {
-      const { error } = await supabase
-        .from("apmc_rates")
-        .delete()
-        .not("id", "is", null);
 
-      if (error) {
-        console.error("Delete error:", error);
-      } else {
-        console.log("Row deleted successfully");
-      }
+    if (existing.length > 0) {
+      console.log(`✅ Rates already exist for ${date}`);
+      return;
     }
 
     const { error } = await supabase.from("apmc_rates").insert(items);
     if (error) throw error;
-    console.log(`Inserted ${items.length} rates for ${date}`);
-    const { er } = await supabase
-      .from("apmc_rates")
-      .delete()
-      .is("commodity", null);
 
-    if (er) {
-      console.error("Error deleting null commodities:", error);
-    }
+    console.log(`✅ Inserted ${items.length} rates for ${date}`);
   } catch (err) {
     console.error("Error fetching/inserting rates:", err.message);
   }
