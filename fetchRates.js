@@ -12,7 +12,7 @@ async function getRates() {
   try {
     const res = await fetch(url);
     const html = await res.text();
-    const $ = load(html); // ✅ correct usage
+    const $ = load(html);
 
     const marqueeText = $(".marquee-with-options-88").text().trim();
     const dateMatch = marqueeText.match(/Date\s*:\s*([^\n]+)/);
@@ -20,7 +20,6 @@ async function getRates() {
     const date = dateMatch[1].trim();
 
     const ratesRaw = marqueeText.replace(/^Date\s*:\s*[^\n]+\n?/i, "").trim();
-
     const items = ratesRaw.split(",").map((line) => {
       const parts = line.trim().split(/\s+/);
       const name = parts.slice(0, -1).join(" ");
@@ -40,16 +39,31 @@ async function getRates() {
 
     if (checkError) throw checkError;
     if (existing.length > 0) {
-      console.log(`✅ Rates already exist for ${date}`);
-      return;
+      const { error } = await supabase
+        .from("apmc_rates")
+        .delete()
+        .not("id", "is", null);
+
+      if (error) {
+        console.error("Delete error:", error);
+      } else {
+        console.log("Row deleted successfully");
+      }
     }
 
     const { error } = await supabase.from("apmc_rates").insert(items);
     if (error) throw error;
+    console.log(`Inserted ${items.length} rates for ${date}`);
+    const { er } = await supabase
+      .from("apmc_rates")
+      .delete()
+      .is("commodity", null);
 
-    console.log(`✅ Inserted ${items.length} rates for ${date}`);
+    if (er) {
+      console.error("Error deleting null commodities:", error);
+    }
   } catch (err) {
-    console.error("❌ Error fetching/inserting rates:", err.message);
+    console.error("Error fetching/inserting rates:", err.message);
   }
 }
 
