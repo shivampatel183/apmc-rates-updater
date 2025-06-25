@@ -33,14 +33,12 @@ async function getRates() {
       };
     });
 
-    // Check if table has any data
     const { data: existing, error: checkError } = await supabase
       .from("apmc_rates")
       .select("id");
 
     if (checkError) throw checkError;
 
-    // If not empty, delete all rows
     if (existing.length > 0) {
       const { error: deleteError } = await supabase
         .from("apmc_rates")
