@@ -6,6 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
 const url = "https://www.apmcunjha.com/index.php/rates";
 
 async function getRates() {
@@ -32,35 +33,43 @@ async function getRates() {
       };
     });
 
+    // Check if table has any data
     const { data: existing, error: checkError } = await supabase
       .from("apmc_rates")
-      .select("id")
-      .eq("date", date);
+      .select("id");
 
     if (checkError) throw checkError;
+
+    // If not empty, delete all rows
     if (existing.length > 0) {
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from("apmc_rates")
         .delete()
         .not("id", "is", null);
 
-      if (error) {
-        console.error("Delete error:", error);
-      } else {
-        console.log("Row deleted successfully");
+      if (deleteError) {
+        console.error("Delete error:", deleteError);
+        return;
       }
+      console.log("Existing data deleted successfully");
     }
 
-    const { error } = await supabase.from("apmc_rates").insert(items);
-    if (error) throw error;
+    // Insert new rates
+    const { error: insertError } = await supabase
+      .from("apmc_rates")
+      .insert(items);
+    if (insertError) throw insertError;
+
     console.log(`Inserted ${items.length} rates for ${date}`);
-    const { er } = await supabase
+
+    // Clean up null commodities if any
+    const { error: nullDeleteError } = await supabase
       .from("apmc_rates")
       .delete()
       .is("commodity", null);
 
-    if (er) {
-      console.error("Error deleting null commodities:", error);
+    if (nullDeleteError) {
+      console.error("Error deleting null commodities:", nullDeleteError);
     }
   } catch (err) {
     console.error("Error fetching/inserting rates:", err.message);
