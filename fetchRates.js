@@ -54,7 +54,6 @@ async function getRates() {
       console.log("Existing data deleted successfully");
     }
 
-    // Insert new rates
     const { error: insertError } = await supabase
       .from("apmc_rates")
       .insert(items);
@@ -62,7 +61,6 @@ async function getRates() {
 
     console.log(`Inserted ${items.length} rates for ${date}`);
 
-    // Clean up null commodities if any
     const { error: nullDeleteError } = await supabase
       .from("apmc_rates")
       .delete()
