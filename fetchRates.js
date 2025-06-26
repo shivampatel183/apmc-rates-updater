@@ -65,7 +65,7 @@ async function getRates() {
       .is("commodity", null);
 
     if (nullDeleteError) {
-      console.error("Error deleting null commodities:", nullDeleteError);
+      console.error("Error deleting null:", nullDeleteError);
     }
   } catch (err) {
     console.error("Error fetching/inserting rates:", err.message);
